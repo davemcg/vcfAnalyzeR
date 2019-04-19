@@ -1,0 +1,15 @@
+Package: vcfAnalyzeR
+Title: Parsing and analysis framework for VCF 
+Version: 0.0.0.0
+Authors@R: 
+    person(given = "David",
+           family = "McGaughey",
+           role = c("aut", "cre"),
+           email = "mcgaughey@gmail.com")
+Description: What the package does (one paragraph).
+License: CC0
+Encoding: UTF-8
+LazyData: true
+Imports:
+  vcfR
+  tidyverse
