@@ -30,7 +30,7 @@ appender <- function(tibble, info_field, numeric = TRUE){
   tibble
 }
 
-vcf <- vcf_import('~/Downloads/EGAD00001002656_2019.GATK.ANNO.novel_exons.vcf.gz')
+vcf <- vcf_import('~/Desktop/EGAD00001002656_2019.GATK.ANNO.novel_exons.vcf.gz')
 merge <- cbind(vcf@fix, vcf@gt) %>% as_tibble()
 
 info2 <- filler(merge$INFO)
@@ -49,15 +49,17 @@ info2 <- filler(merge$INFO, regex = "gno_ac_popmax\\=", filler_value = ";gno_ac_
 merge[,'gno_ac_popmax'] <- str_split(info2, ';') %>% unlist() %>% grep('^gno_ac_popmax\\=',., value =T) %>% gsub('gno_ac_popmax=','',.) %>% as.numeric()
 
 
-samples <- grep('^[B|W]\\d', colnames(merge), value =T)
+samples <- grep('^[B|W|G]\\d', colnames(merge), value =T)
 
 
-HET_COUNT <- c()
-HOM_COUNT <- c()
+HET_COUNT <- numeric(nrow(merge))
+HOM_COUNT <- numeric(nrow(merge))
 for (i in seq(1,nrow(merge))){
-  HET_COUNT <- c(((merge[i,samples] %>% map(~ str_extract(.x, pattern = '^[\\d|\\.][\\/|\\|][\\d\\.]')) %>% unlist()) == "0/1") %>% sum(), HET_COUNT)
-  HOM_COUNT <- c(((merge[i,samples] %>% map(~ str_extract(.x, pattern = '^[\\d|\\.][\\/|\\|][\\d\\.]')) %>% unlist()) == "1/1") %>% sum(), HOM_COUNT)
+  HET_COUNT[i] <- ((merge[i,samples] %>% map(~ str_extract(.x, pattern = '^[\\d|\\.][\\/|\\|][\\d\\.]')) %>% unlist()) == "0/1") %>% sum()
+  HOM_COUNT[i] <- ((merge[i,samples] %>% map(~ str_extract(.x, pattern = '^[\\d|\\.][\\/|\\|][\\d\\.]')) %>% unlist()) == "1/1") %>% sum()
 }
 merge$HET_COUNT <- HET_COUNT
 merge$HOM_COUNT <- HOM_COUNT
 
+merge <- appender(merge, 'CSQ', numeric = FALSE)
+merge <- merge %>% rowwise() %>% mutate(Gene = str_split(CSQ, pattern = '\\|')[[1]][6])
