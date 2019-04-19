@@ -63,3 +63,6 @@ merge$HOM_COUNT <- HOM_COUNT
 
 merge <- appender(merge, 'CSQ', numeric = FALSE)
 merge <- merge %>% rowwise() %>% mutate(Gene = str_split(CSQ, pattern = '\\|')[[1]][6])
+
+
+merge %>% filter(HOM_COUNT > 0, gno_hom < 1, gno_af_all < 0.001, HOM_COUNT < 10, HET_COUNT < 10) %>% select(-contains('B2'), -contains('G0'), -contains('W0'), -CSQ, -INFO, -FILTER, -FORMAT) %>% arrange(-phyloP_100way)
